@@ -20,7 +20,7 @@ let inline arguExnChain exn fmt = Printf.ksprintf(fun msg -> raise <| ArguExcept
 let getEnvironmentCommandLineArgs () =
     match Environment.GetCommandLineArgs() with
     | [||] -> [||]
-    | args -> args[1..]
+    | args -> args[1..2]
 
 [<RequireQualifiedAccess>]
 module Enum =

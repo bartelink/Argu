@@ -1067,3 +1067,29 @@ module ``Argu Tests Main Primitive`` =
             raisesWith<ArguParseException>
                 <@ results.GetResult(Working_Directory, def, parser)  @>
                 (fun e -> <@ e.Message.StartsWith "Parse Failed" && e.Message.Contains "--working-directory" @>)
+
+    [<RequireSubcommand; NoComparison; CliPrefix(CliPrefix.None)>]
+    type Args =
+    | [<SubCommand; CliPrefix(CliPrefix.None)>] Init of ParseResults<InitArgs>
+        interface IArgParserTemplate with member arg.Usage = "a"
+    and [<CliPrefix(CliPrefix.None)>]
+        InitArgs =
+        | [<AltCommandLine "-u">] Unspecified
+        | Container of int
+        | ContainerA of int
+        | [<SubCommand>] Cosmos of ParseResults<Cosmos>
+        interface IArgParserTemplate with member arg.Usage = "a"
+    and [<CliPrefix(CliPrefix.None)>] Cosmos =
+        | X of int
+        interface IArgParserTemplate with member arg.Usage = "a"
+
+
+    [<Fact>]
+    let ``DUs`` () =
+        let args = [| "init"; "containera"; "400"; "cosmos" |]
+        let parser = ArgumentParser.Create<Args>()
+        let results = parser.ParseCommandLine args
+        let i = results.GetResult(Init)
+        test <@ 400 = i.GetResult(ContainerA) @>
+        test <@ match i.GetSubCommand() with Cosmos _ -> true | _ -> false @>
+
